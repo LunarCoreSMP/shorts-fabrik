@@ -29,19 +29,36 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
         run: |
-          python << 'EOF'
-          import requests, random, os, json, subprocess
-          from gtts import gTTS
+         python << 'EOF'
+import requests, random, os, json, subprocess
+from gtts import gTTS
 
-          print("1. Hole Reddit Post...")
-          subs = ['Austria','de','FragReddit','todayilearned']
-          sub = random.choice(subs)
-          headers = {'User-agent':'Mozilla/5.0'}
-          r = requests.get(f'https://www.reddit.com/r/{sub}/top.json?limit=10&t=day', headers=headers)
-          posts = [p['data'] for p in r.json()['data']['children'] if not p['data']['stickied'] and len(p['data']['title']) > 20]
-          post = random.choice(posts)
-          reddit_title = post['title']
-          print(f"Gewählt: {reddit_title}")
+try:
+    print("1. Hole Reddit Post...")
+    subs = ['Austria','de','FragReddit','todayilearned']
+    sub = random.choice(subs)
+    headers = {'User-agent':'Mozilla/5.0'}
+    r = requests.get(f'https://www.reddit.com/r/{sub}/top.json?limit=10&t=day', headers=headers)
+    r.raise_for_status()
+    
+    data = r.json()
+    posts = [p['data'] for p in data['data']['children'] if not p['data']['stickied'] and len(p['data']['title']) > 20]
+    if not posts:
+        raise Exception(f"No valid posts found in r/{sub}")
+        
+    post = random.choice(posts)
+    reddit_title = post['title']
+    print(f"Gewählt: {reddit_title}")
+
+    # Rest deines Codes bleibt gleich
+    # ...
+except Exception as e:
+    print(f"FEHLER: {e}")
+    # Als Fallback ein fixen Text nehmen
+    reddit_title = "10 interessante Fakten über Österreich"
+    print(f"Fallsback auf: {reddit_title}")
+    # Rest des Codes bleibt gleich
+EOF
 
           print("2. Lasse Groq Script schreiben...")
           groq_res = requests.post('https://api.groq.com/openai/v1/chat/completions',
