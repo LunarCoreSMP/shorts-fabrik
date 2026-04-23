@@ -143,5 +143,13 @@ jobs:
                   print(f"Upload fehlgeschlagen: {response.text}")
           print("FERTIG!")
           EOF
+          - name: Upload Video Artifact
+  uses: actions/upload-artifact@v4
+  with:
+    name: shorts-video
+    path: |
+      output.mp4
+      meta.txt
+      
       - name: Notify Success
         run: echo "Video generiert und hochgeladen!"
